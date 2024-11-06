@@ -12,6 +12,7 @@ from openlp.core.common.enum import PluginStatus
 from openlp.plugins.timer.lib.mediaitem import TimerMediaItem
 from openlp.plugins.timer.lib.timertab import TimerTab
 from openlp.plugins.timer.lib.db import init_schema
+from openlp.plugins.timer.lib.db import TimerSlide
 
 from PySide6 import QtCore, QtGui
 
@@ -26,6 +27,7 @@ __default_settings__ = {
     'timer/db database': '',
     'timer/theme': None,
     'timer/last directory': None,
+    'timer/add timer from service': True,
     'shortcuts/listViewTimerDeleteItem': [QtGui.QKeySequence(QtGui.QKeySequence.StandardKey.Delete)],
     'shortcuts/listViewTimerPreviewItem': [QtGui.QKeySequence(QtCore.Qt.Key.Key_Return),
                                             QtGui.QKeySequence(QtCore.Qt.Key.Key_Enter)],
@@ -45,7 +47,7 @@ class TimerPlugin(Plugin):
         """
         Settings().extend_default_settings(__default_settings__)
 
-        super(TimerPlugin, self).__init__('timer',__default_settings__, TimerMediaItem, TimerTab)
+        super(TimerPlugin, self).__init__('timer', TimerMediaItem, TimerTab)
         self.weight = -11
         self.db_manager = DBManager(self.name, init_schema)
         self.icon_path = UiIcons().custom
@@ -113,15 +115,3 @@ class TimerPlugin(Plugin):
         for timer in timer_using_theme:
             timer.theme_name = new_theme
             self.db_manager.save_object(timer)
-
-    def finalise(self):
-        """
-        Time to tidy up on exit
-        """
-        log.info('Timer Finalising')
-        # call timer manager to delete pco slides
-        pco_slides = self.db_manager.get_all_objects(TimerSlide, TimerSlide.credits == 'pco')
-        for slide in pco_slides:
-            self.db_manager.delete_object(TimerSlide, slide.id)
-        self.db_manager.finalise()
-        Plugin.finalise(self)

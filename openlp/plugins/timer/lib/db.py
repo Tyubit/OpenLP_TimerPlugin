@@ -1,9 +1,10 @@
 """
 The :mod:`db` module provides the database and schema that is the backend for the Timer plugin.
 """
-from sqlalchemy.orm import Session, declarative_base
-from sqlalchemy import Column, Table, types
-from sqlalchemy.orm import mapper
+from sqlalchemy.orm import declarative_base
+from sqlalchemy import Column, types
+from sqlalchemy.types import Integer, Unicode, UnicodeText
+
 
 from openlp.core.db.helpers import init_db
 from openlp.core.common.i18n import get_locale_key, get_natural_key
@@ -18,18 +19,17 @@ class TimerSlide(Base):
 
     __tablename__ = 'timer_slide'
 
-    id = Column(types.Integer(), primary_key=True)
+    id = Column(Integer, primary_key=True)
     title = Column(types.Unicode(255), nullable=False)
-    timer_type = Column(types.Integer)
     timer_duration = Column(types.Time)
     timer_use_specific_date = Column(types.Unicode(2))
     timer_specific_date = Column(types.Date)
     timer_use_specific_time = Column(types.Unicode(2))
     timer_specific_time = Column(types.Time)
-    interval_large = Column(types.Integer)
-    interval_small = Column(types.Integer)
-    finish_action = Column(types.Integer)
-    theme_name = Column(types.Unicode(128))
+    interval_large = Column(Integer)
+    interval_small = Column(Integer)
+    finish_action = Column(Integer)
+    theme_name = Column(Unicode(128))
 
     # By default sort the timers by its title considering language specific characters.
     def __lt__(self, other):
@@ -40,7 +40,7 @@ class TimerSlide(Base):
 
     def __hash__(self):
         """
-        Return the hash for a custom slide.
+        Return the hash for a timer slide.
         """
         return self.id
 
