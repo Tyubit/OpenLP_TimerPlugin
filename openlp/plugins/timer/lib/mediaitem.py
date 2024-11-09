@@ -15,6 +15,7 @@ from openlp.core.lib.ui import create_widget_action
 from openlp.core.ui.icons import UiIcons
 
 from openlp.plugins.timer.lib.db import TimerSlide
+from openlp.plugins.timer.forms.edittimerform import EditTimerForm
 
 log = logging.getLogger(__name__)
 
@@ -33,6 +34,7 @@ class TimerMediaItem(MediaManagerItem):
         """
         Do some additional setup.
         """
+        self.edit_timer_form = EditTimerForm(self, self.main_window, self.plugin.db_manager)
         self.single_service_item = False
         self.quick_preview_allowed = True
         self.has_search = True
@@ -114,6 +116,22 @@ class TimerMediaItem(MediaManagerItem):
         Registry().execute('timer_changed', new_timer_slide.id)
         self.on_search_text_button_clicked()
 
+    def on_new_click(self):
+        """
+        Handle the New item event
+        """
+        self.edit_timer_form.load_timer(0)
+        self.edit_timer_form.exec()
+        self.on_clear_text_button_click()
+        self.on_selection_change()
+
+    def on_focus(self):
+        """
+        Set the focus
+        """
+        self.search_text_edit.setFocus()
+        self.search_text_edit.selectAll()
+    
     
     
     
