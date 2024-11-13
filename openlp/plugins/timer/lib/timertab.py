@@ -23,28 +23,17 @@ class TimerTab(SettingsTab):
         self.left_layout.addWidget(self.timer_mode_group_box)
         self.left_layout.addStretch()
         self.right_layout.addStretch()
-        self.add_from_service_checkbox.stateChanged.connect(self.on_add_from_service_check_box_changed)
 
     def retranslateUi(self):
         self.custom_mode_group_box.setTitle(translate('TimerPlugin.TimerTab', 'Timer Display'))
-        self.add_from_service_checkbox.setText(translate('TimerPlugin.TimerTab',
-                                               'Import missing timer slides from service files'))
-
-    def on_add_from_service_check_box_changed(self, check_state):
-        """
-        Allows service items to create Timer items.
-
-        :param check_state: The current check box state
-        """
-        self.update_load = (check_state == QtCore.Qt.CheckState.Checked)
-
+    
     def load(self):
         """
         Load the settings into the dialog
         """
         self.update_load = self.settings.value('timer/add timer from service')
         self.add_from_service_checkbox.setChecked(self.update_load)
-
+    
     def save(self):
         """
         Save the Dialog settings

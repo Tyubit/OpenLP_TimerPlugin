@@ -65,7 +65,6 @@ class Ui_TimerEditDialog(object):
         self.timer_options_layout.addWidget(self.timer_minutes_input)
         self.dropdown_layout.addWidget(self.timer_options)
         self.timer_options.show()
-        
         #Specific Timer Layout
         self.clocktimer_checkbox = QtWidgets.QCheckBox("Clock Timer", timer_edit_dialog)
         self.clocktimer_checkbox.setObjectName('clocktimer_checkbox')
@@ -77,7 +76,7 @@ class Ui_TimerEditDialog(object):
         #Specific Timer dropdown
         self.clocktimer_options = QtWidgets.QTimeEdit(timer_edit_dialog)
         self.clocktimer_options.setObjectName('clocktimer_options')
-        self.clocktimer_options.setDisplayFormat("HH:mm AP")
+        self.clocktimer_options.setDisplayFormat("HH:mm")
         self.clocktimer_options.setTime(QtCore.QTime(12, 30))
         self.dropdown_layout.addWidget(self.clocktimer_options)
         self.clocktimer_options.hide()

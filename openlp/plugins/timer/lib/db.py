@@ -1,9 +1,9 @@
 """
 The :mod:`db` module provides the database and schema that is the backend for the Timer plugin.
 """
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base,sessionmaker
 from sqlalchemy import Column, types
-from sqlalchemy.types import Integer, Unicode, UnicodeText
+from sqlalchemy.types import Integer, Unicode, UnicodeText ,Boolean,Time
 
 
 from openlp.core.db.helpers import init_db
@@ -21,14 +21,10 @@ class TimerSlide(Base):
 
     id = Column(Integer, primary_key=True)
     title = Column(types.Unicode(255), nullable=False)
-    timer_duration = Column(types.Time)
-    timer_use_specific_date = Column(types.Unicode(2))
-    timer_specific_date = Column(types.Date)
-    timer_use_specific_time = Column(types.Unicode(2))
-    timer_specific_time = Column(types.Time)
-    interval_large = Column(Integer)
-    interval_small = Column(Integer)
-    finish_action = Column(Integer)
+    text = Column(types.Unicode(255))
+    timer_duration = Column(Integer)
+    timer_use_timer = Column(Boolean)
+    timer_use_specific_time = Column(Boolean)
     theme_name = Column(Unicode(128))
 
     # By default sort the timers by its title considering language specific characters.
