@@ -9,7 +9,7 @@ from openlp.core.state import State
 from openlp.core.ui.icons import UiIcons
 from openlp.core.common.enum import PluginStatus
 
-from openlp.plugins.timer.lib.mediaitem import TimerMediaItem
+from openlp.plugins.timer.lib.mediaitem import TimerMediaItem, TimerSearch
 from openlp.plugins.timer.lib.timertab import TimerTab
 from openlp.plugins.timer.lib.db import init_schema
 from openlp.plugins.timer.lib.db import TimerSlide
@@ -20,6 +20,7 @@ log = logging.getLogger(__name__)
 
 __default_settings__ = {
     'timer/db type': 'sqlite',
+    'timer/last used search type': TimerSearch.Titles,
     'timer/status': PluginStatus.Inactive,
     'timer/db username': '',
     'timer/db password': '',

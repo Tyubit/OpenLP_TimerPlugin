@@ -8,7 +8,6 @@ from openlp.core.common.registry import Registry
 from openlp.core.lib.ui import critical_error_message_box, find_and_set_in_combo_box
 
 from openlp.plugins.timer.forms.edittimerdialog import Ui_TimerEditDialog
-from openlp.plugins.timer.forms.edittimerslideform import EditTimerSlideForm
 from openlp.plugins.timer.lib.db import TimerSlide
 
 log = logging.getLogger(__name__)
@@ -30,13 +29,22 @@ class EditTimerForm(QtWidgets.QDialog, Ui_TimerEditDialog):
         self.manager = manager
         self.media_item = media_item
         self.setup_ui(self)
-        # Create other objects and forms.
-        self.edit_slide_form = EditTimerSlideForm(self)
         # Connecting signals and slots
         self.timer_checkbox.stateChanged.connect(self.timer_checkbox_state_changed)
         self.clocktimer_checkbox.stateChanged.connect(self.clocktimer_checkbox_state_changed)
         self.save_button.clicked.connect(self.on_save_button_clicked)
+        Registry().register_function('theme_update_list',self.load_themes)
     
+    def load_themes(self, theme_list):
+        """
+        Load a list of themes into the themes combo box.
+
+        :param theme_list: The list of themes to load.
+        """
+        self.theme_combo_box.clear()
+        self.theme_combo_box.addItem('')
+        self.theme_combo_box.addItems(theme_list)
+
     def load_timer(self, id, preview=False):
         """
         Called when editing or creating a new timer.
@@ -54,6 +62,7 @@ class EditTimerForm(QtWidgets.QDialog, Ui_TimerEditDialog):
             self.timer_hours_input.setText('0')
             self.timer_minutes_input.setText('0')
             self.clocktimer_options.setTime(QtCore.QTime(12, 30))
+            self.theme_combo_box.setCurrentIndex(0)
         else:
             self.timer_slide = self.manager.get_object(TimerSlide, id)
             print('db duration', self.timer_slide.timer_duration)
@@ -64,6 +73,8 @@ class EditTimerForm(QtWidgets.QDialog, Ui_TimerEditDialog):
             self.timer_hours_input.setText(str(self.timer_slide.timer_duration // 60))
             self.timer_minutes_input.setText(str(self.timer_slide.timer_duration % 60))
             self.clocktimer_options.setTime(QtCore.QTime((current_time.hour + (self.timer_slide.timer_duration // 60)-24), current_time.minute + (self.timer_slide.timer_duration % 60)))
+            theme = self.timer_slide.theme_name
+            find_and_set_in_combo_box(self.theme_combo_box,theme)
         self.title_edit.setFocus()
     
     def timer_checkbox_state_changed(self, state):
@@ -108,6 +119,7 @@ class EditTimerForm(QtWidgets.QDialog, Ui_TimerEditDialog):
         self.timer_slide.text = self.text_edit.text()
         self.timer_slide.timer_use_timer = self.timer_checkbox.checkState() == 2
         self.timer_slide.timer_use_specific_time = self.clocktimer_checkbox.checkState() == 2
+        self.timer_slide.theme_name = self.theme_combo_box.currentText()
         if (self.timer_checkbox.checkState() == QtCore.Qt.Checked):
             self.timer_slide.timer_duration = (int(self.timer_hours_input.text())*60 + int(self.timer_minutes_input.text()))
         else:

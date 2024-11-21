@@ -4,13 +4,13 @@ from typing import Any
 from PySide6 import QtCore, QtWidgets
 from sqlalchemy.sql import and_, func, or_
 
-from openlp.core.common.enum import CustomSearch
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.common.registry import Registry
 from openlp.core.lib import check_item_selected
 from openlp.core.lib.mediamanageritem import MediaManagerItem
 from openlp.core.lib.plugin import PluginStatus
 from openlp.core.lib.serviceitem import ItemCapabilities
+from openlp.core.lib import ServiceItemContext, check_item_selected
 from openlp.core.lib.ui import create_widget_action
 from openlp.core.ui.icons import UiIcons
 
@@ -19,6 +19,11 @@ from openlp.plugins.timer.forms.edittimerform import EditTimerForm
 
 log = logging.getLogger(__name__)
 
+class TimerSearch(object):
+    """
+    An enumeration for timer search methods.
+    """
+    Titles = 1
 class TimerMediaItem(MediaManagerItem):
     """
     This is the timer media manager item for timers.
@@ -39,6 +44,7 @@ class TimerMediaItem(MediaManagerItem):
         self.single_service_item = True
         self.quick_preview_allowed = True
         self.has_search = True
+        self.remote_timer = -1
     
     def add_end_header_bar(self):
         """
@@ -75,16 +81,10 @@ class TimerMediaItem(MediaManagerItem):
         # Reload the list considering the new search type.
         search_type = self.search_text_edit.current_search_type()
         search_keywords = '%{search}%'.format(search=self.whitespace.sub(' ', self.search_text_edit.displayText()))
-        if search_type == CustomSearch.Titles:
+        if search_type == TimerSearch.Titles:
             log.debug('Titles Search')
             search_results = self.plugin.db_manager.get_all_objects(TimerSlide,
                                                                             TimerSlide.title.like(search_keywords),
-                                                                            order_by_ref=TimerSlide.title)
-            self.load_list(search_results)
-        elif search_type == CustomSearch.Themes:
-            log.debug('Theme Search')
-            search_results = self.plugin.db_manager.get_all_objects(TimerSlide,
-                                                                            TimerSlide.theme_name.like(search_keywords),
                                                                             order_by_ref=TimerSlide.title)
             self.load_list(search_results)
     
@@ -185,6 +185,8 @@ class TimerMediaItem(MediaManagerItem):
         """
         Initialise the UI so it can provide Searches
         """
+        self.search_text_edit.set_search_types([(TimerSearch.Titles, UiIcons().search, translate('SongsPlugin.MediaItem', 'Titles'),
+                                                 translate('SongsPlugin.MediaItem', 'Search Titles...'))])
         self.load_list(self.plugin.db_manager.get_all_objects(TimerSlide, order_by_ref=TimerSlide.title))
         self.config_update()
     
@@ -228,27 +230,45 @@ class TimerMediaItem(MediaManagerItem):
         """
         Generate the slide data. Needs to be implemented by the plugin.
         :param service_item: To be updated
-        :param item: The custom database item to be used
+        :param item: The timer database item to be used
         :param kwargs: Consume other unused args specified by the base implementation, but not use by this one.
         """
-        item = self.list_view.currentItem()
-        item_id = item.data(QtCore.Qt.ItemDataRole.UserRole)
+        item_id = self._get_id_of_item_to_generate(item, self.remote_timer)
         service_item.add_capability(ItemCapabilities.CanEdit)
         service_item.add_capability(ItemCapabilities.CanPreview)
         service_item.add_capability(ItemCapabilities.CanLoop)
-        service_item.add_capability(ItemCapabilities.CanSoftBreak)
         service_item.add_capability(ItemCapabilities.OnLoadUpdate)
-        service_item.add_capability(ItemCapabilities.CanWordSplit)
+        service_item.add_capability(ItemCapabilities.CanSoftBreak)
+        service_item.add_capability(ItemCapabilities.CanAutoStartForLive)
+        s
         timer_slide = self.plugin.db_manager.get_object(TimerSlide, item_id)
         title = timer_slide.title
         text = timer_slide.text
-        timer_duration = timer_slide.timer_duration
+        print(timer_slide)
+        timer_duration = str(timer_slide.timer_duration)
+        theme = timer_slide.theme_name
+        service_item.edit_id = item_id
+        if theme:
+            service_item.theme = theme
         service_item.title = title
-        service_item.text.add_from_text(text)
-        service_item.add_from_text(timer_duration)
+        service_item.processor = 'qt6'
+        service_item.add_from_command(filename, name, self.clapperboard)
+        service_item.add_from_text(f"{text}, {int(timer_duration)}")
+        return True
+    
+    def service_load(self, item):
+        """
+        Triggered by a timer item being loaded by the service manager.
 
-    
-    
+        :param item: The service Item from the service to load found in the database.
+        """
+        log.debug('service_load')
+        print('service_load')
+
+        if self.plugin.status != PluginStatus.Active:
+            return
+        self.plugin.service_manager.update_service_item(item)
+
 
 
 

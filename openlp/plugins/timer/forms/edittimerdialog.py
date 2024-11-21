@@ -82,10 +82,18 @@ class Ui_TimerEditDialog(object):
         self.clocktimer_options.hide()
         self.dialog_layout.addLayout(self.checkbox_layout)
         self.dialog_layout.addLayout(self.dropdown_layout)
-        #Bottom Form Layout
+        #Theme
         self.bottom_form_layout = QtWidgets.QFormLayout()
         self.bottom_form_layout.setObjectName('bottom_form_layout')
         self.dialog_layout.addLayout(self.bottom_form_layout)
+        self.theme_label = QtWidgets.QLabel(timer_edit_dialog)
+        self.theme_label.setObjectName('theme_label')
+        self.theme_combo_box = QtWidgets.QComboBox(timer_edit_dialog)
+        self.theme_combo_box.setSizeAdjustPolicy(QtWidgets.QComboBox.SizeAdjustPolicy.AdjustToContents)
+        self.theme_combo_box.setObjectName('theme_combo_box')
+        self.theme_label.setBuddy(self.theme_combo_box)
+        self.bottom_form_layout.addRow(self.theme_label, self.theme_combo_box)
+        #Bottons Form Layout
         self.button_layout = QtWidgets.QVBoxLayout()
         self.button_layout.setObjectName('button_layout')
         self.button_box = create_button_box(timer_edit_dialog, 'button_box', ['cancel', 'save', 'help'])
@@ -98,4 +106,5 @@ class Ui_TimerEditDialog(object):
         timer_edit_dialog.setWindowTitle(translate('TimerPlugin.EditTimerForm', 'Edit Timer'))
         self.title_label.setText(translate('TimerPlugin.EditTimerForm', '&Title:'))
         self.text_label.setText(translate('TimerPlugin.EditTimerForm', '&Text(optional):'))
+        self.theme_label.setText(translate('TimerPlugin.EditTimerForm', 'The&me:'))
         self.save_button.setText(UiStrings().SaveAndClose)
